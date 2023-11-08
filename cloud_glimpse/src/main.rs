@@ -1,3 +1,5 @@
+use cloud_glimpse::run;
+
 fn main() {
-    println!("Hello, world!");
+    run();
 }
