@@ -42,28 +42,34 @@ impl Vertex {
 
 const VERTICES: &[Vertex] = &[
     Vertex {
-        position: [-0.0868241, 0.49240386, 0.0],
-        color: [1.0, 0.0,0.0],
+        position: [0.0, 0.0, 1.0],
+        color: [1.0, 1.0,1.0],
     }, // A
     Vertex {
-        position: [-0.49513406, 0.06958647, 0.0],
-        color: [0.0, 1.0,0.0],
+        position: [0.0, 1.0, 0.0],
+        color: [1.0, 1.0,1.0],
     }, // B
     Vertex {
-        position: [-0.21918549, -0.44939706, 0.0],
-        color: [0.0, 0.0,1.0],
+        position: [1.0, 0.0, 0.0],
+        color: [1.0, 1.0,1.0],
     }, // C
     Vertex {
-        position: [0.35966998, -0.3473291, 0.0],
-        color: [0.0, 1.0,0.0],
-    }, // D
+        position: [0.0, 1.0, 0.0],
+        color: [1.0, 1.0,1.0],
+    }, // B
     Vertex {
-        position: [0.44147372, 0.2347359, 0.0],
-        color: [1.0, 0.0,0.0],
-    }, // E
+        position: [1.0, 1.0, 0.0],
+        color: [1.0, 1.0,1.0],
+    }, // A
+    Vertex {
+        position: [1.0, 0.0, 0.0],
+        color: [1.0, 1.0,1.0],
+    }, // C
+   
+
 ];
 
-const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /* padding */ 0];
+
 
 #[rustfmt::skip]
 pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
@@ -218,8 +224,6 @@ struct State {
     size: winit::dpi::PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
-    num_indices: u32,
 
     // NEW!
     camera: Camera,
@@ -373,7 +377,7 @@ impl State {
                 })],
             }),
             primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList,
+                topology: wgpu::PrimitiveTopology::PointList,
                 strip_index_format: None,
                 front_face: wgpu::FrontFace::Ccw,
                 cull_mode: Some(wgpu::Face::Back),
@@ -401,12 +405,6 @@ impl State {
             contents: bytemuck::cast_slice(VERTICES),
             usage: wgpu::BufferUsages::VERTEX,
         });
-        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Index Buffer"),
-            contents: bytemuck::cast_slice(INDICES),
-            usage: wgpu::BufferUsages::INDEX,
-        });
-        let num_indices = INDICES.len() as u32;
 
         Self {
             surface,
@@ -416,8 +414,6 @@ impl State {
             size,
             render_pipeline,
             vertex_buffer,
-            index_buffer,
-            num_indices,
             camera,
             camera_controller,
             camera_buffer,
@@ -476,9 +472,9 @@ impl State {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
+                            r: 0.0,
+                            g: 0.0,
+                            b: 0.0,
                             a: 1.0,
                         }),
                         store: wgpu::StoreOp::Store,
@@ -492,8 +488,8 @@ impl State {
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+            render_pass.draw(0..VERTICES.len() as u32, 0..1);
+            
         }
 
         self.queue.submit(iter::once(encoder.finish()));
