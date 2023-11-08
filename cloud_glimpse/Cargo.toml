@@ -9,11 +9,19 @@ resolver = "2"
 crate-type = ["cdylib", "rlib"]
 [dependencies]
 cfg-if = "1"
-winit = "0.28"
+anyhow = "1.0"
+bytemuck = { version = "1.12", features = [ "derive" ] }
+cgmath = "0.18"
 env_logger = "0.10"
 log = "0.4"
-wgpu = "0.18"
 pollster = "0.3"
+wgpu = "0.18"
+winit = "0.28"
+
+[dependencies.image]
+version = "0.24"
+default-features = false
+features = ["png", "jpeg"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.6"
@@ -26,3 +34,7 @@ web-sys = { version = "0.3.53", features = [
     "Window",
     "Element",
 ]}
+[build-dependencies]
+anyhow = "1.0"
+fs_extra = "1.2"
+glob = "0.3"

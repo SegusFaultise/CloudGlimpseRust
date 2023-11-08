@@ -12,26 +12,8 @@
                 "args": [
                     "build",
                     "--bin=cloud_glimpse",
-                    "--package=cloud_glimpse"
-                ],
-                "filter": {
-                    "name": "cloud_glimpse",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'cloud_glimpse'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=cloud_glimpse",
-                    "--package=cloud_glimpse"
+                    "--package=cloud_glimpse",
+                    "--manifest-path=cloud_glimpse/Cargo.toml"
                 ],
                 "filter": {
                     "name": "cloud_glimpse",
