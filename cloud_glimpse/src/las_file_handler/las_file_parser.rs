@@ -66,7 +66,11 @@ pub struct PointRecord {
     pub intensity: u16,
     pub return_info: u8,
     pub classification_flags: u8,
+    pub scanner_channel: u8,
+    pub scan_direction_flag: bool,
+    pub edge_of_flight_line: bool,
     pub classification: u8,
+    pub user_data: u8,
     pub scan_angle: i16,
     pub point_source_id: u16,
     pub gps_time: f64,
@@ -83,9 +87,9 @@ impl LasFileHeader {
     fn from_le_bytes(bytes: &[u8]) -> io::Result<Self> {
         if bytes.len() != std::mem::size_of::<Self>() {
             return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "Incorrect length for header data",
-            ));
+                    io::ErrorKind::InvalidData,
+                    "Incorrect length for header data",
+                    ));
         }
         Ok(unsafe { std::ptr::read(bytes.as_ptr() as *const _) })
     }
@@ -95,9 +99,9 @@ impl PointRecord {
     pub fn new(data: &[u8]) -> io::Result<Self> {
         if data.len() != mem::size_of::<Self>() {
             return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "Incorrect length for point record data",
-            ));
+                    io::ErrorKind::InvalidData,
+                    "Incorrect length for point record data",
+                    ));
         }
         Ok(unsafe { std::ptr::read(data.as_ptr() as *const _) })
     }
@@ -111,7 +115,7 @@ impl PointRecord {
     }
 }
 
-pub fn read_point_record(
+pub fn read_point_record3(
     file: &mut File,
     las_file_header: &LasFileHeader,
     ) -> io::Result<Point3D> {
@@ -122,12 +126,40 @@ pub fn read_point_record(
     let point_record = PointRecord::new(&buffer)?;
 
     Ok(Point3D::new(
-        f64::from(point_record.x) * las_file_header.x_scale_factor + las_file_header.x_offset,
-        f64::from(point_record.y) * las_file_header.y_scale_factor + las_file_header.y_offset,
-        f64::from(point_record.z) * las_file_header.z_scale_factor + las_file_header.z_offset,
-    ))
+            f64::from(point_record.x) / las_file_header.x_scale_factor + las_file_header.x_offset,
+            f64::from(point_record.y) / las_file_header.y_scale_factor + las_file_header.y_offset,
+            f64::from(point_record.z) / las_file_header.z_scale_factor + las_file_header.z_offset,
+            ))
 }
 
+pub fn read_point_record(file: &mut File) -> io::Result<Point3D> {
+    let mut buffer = [0; std::mem::size_of::<PointRecord>()];
+    file.read_exact(&mut buffer)?;
+
+    // Assuming PointRecord6 is defined as described
+    let point_record = PointRecord {
+        x: i32::from_le_bytes(buffer[0..4].try_into().unwrap()),
+        y: i32::from_le_bytes(buffer[4..8].try_into().unwrap()),
+        z: i32::from_le_bytes(buffer[8..12].try_into().unwrap()),
+        intensity: u16::from_le_bytes(buffer[12..14].try_into().unwrap()),
+        return_info: buffer[14] & 0x0F, // Extract lower 4 bits
+        classification_flags: buffer[14] >> 4 & 0x0F, // Extract upper 4 bits
+        scanner_channel: buffer[15] & 0x03, // Extract bits 0-1
+        scan_direction_flag: (buffer[15] & 0x40) != 0, // Extract bit 6
+        edge_of_flight_line: (buffer[15] & 0x80) != 0, // Extract bit 7
+        classification: buffer[16],
+        user_data: buffer[17],
+        scan_angle: i16::from_le_bytes(buffer[18..20].try_into().unwrap()),
+        point_source_id: u16::from_le_bytes(buffer[20..22].try_into().unwrap()),
+        gps_time: f64::from_le_bytes(buffer[22..30].try_into().unwrap()),
+    };
+
+    Ok(Point3D::new(
+        f64::from(point_record.x),
+        f64::from(point_record.y),
+        f64::from(point_record.z),
+    ))
+}
 
 pub fn print_las_header_info(header: &LasFileHeader) {
     println!("Version: {}.{}", header.version_major, header.version_minor);
@@ -146,8 +178,15 @@ pub fn read_las_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
 
     let mut point_records: Vec<Point3D> = Vec::new();
 
-    while let Ok(point_record) = read_point_record(&mut file, &las_file_header) {
+    while let Ok(point_record) = read_point_record(&mut file) {
+        println!(
+            "Point: X = {:.2}, Y = {:.2}, Z = {:.2}",
+            point_record.x,
+            point_record.y,
+            point_record.z
+            );
         point_records.push(point_record);
     }
+
     Ok(point_records)
 }

@@ -17,6 +17,7 @@ log = "0.4"
 pollster = "0.3"
 wgpu = "0.18"
 winit = "0.28"
+lazy_static = "1.4"
 
 [dependencies.image]
 version = "0.24"

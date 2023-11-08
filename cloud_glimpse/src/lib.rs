@@ -1,5 +1,8 @@
 use std::iter;
-
+use las_file_handler::las_file_parser::{read_las_file_header, read_las_file, read_point_record, print_las_header_info};
+mod las_file_handler;
+use std::path::Path;
+use std::error::Error;
 use wgpu::util::DeviceExt;
 use winit::{
     event::*,
@@ -40,7 +43,9 @@ impl Vertex {
     }
 }
 
-const VERTICES: &[Vertex] = &[
+
+
+static mut VERTICES: &[Vertex] = &[
     Vertex {
         position: [0.0, 0.0, 1.0],
         color: [1.0, 1.0,1.0],
@@ -402,7 +407,7 @@ impl State {
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTICES),
+            contents: bytemuck::cast_slice(unsafe { VERTICES }),
             usage: wgpu::BufferUsages::VERTEX,
         });
 
@@ -488,7 +493,7 @@ impl State {
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.draw(0..VERTICES.len() as u32, 0..1);
+            render_pass.draw(0..unsafe { VERTICES.len() } as u32, 0..1);
             
         }
 
@@ -500,7 +505,7 @@ impl State {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(start))]
-pub async fn run() {
+pub async fn run() -> Result<(), Box<dyn Error>> {
     cfg_if::cfg_if! {
         if #[cfg(target_arch = "wasm32")] {
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
@@ -509,7 +514,23 @@ pub async fn run() {
             env_logger::init();
         }
     }
+    
 
+    let file_path = Path::new("points.las");
+    let point_records = read_las_file(file_path)?;
+    // create an array of vertices from the point records
+    let mut vertices: Vec<Vertex> = Vec::new();
+    for (i,point) in point_records.iter().enumerate() {
+        let vertex = Vertex {
+            position: [point.x as f32, point.y as f32, point.z as f32],
+            color: [1.0, 1.0, 1.0]
+        };
+        vertices.push(vertex);
+    }
+    unsafe {
+        VERTICES = std::mem::transmute(&vertices[..]);
+    }
+    
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
