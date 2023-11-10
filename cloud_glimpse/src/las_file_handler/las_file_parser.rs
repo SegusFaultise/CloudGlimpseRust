@@ -96,6 +96,8 @@ impl LasFileHeader {
 }
 
 impl PointRecord {
+    
+    #[warn(dead_code)]
     pub fn new(data: &[u8]) -> io::Result<Self> {
         if data.len() != mem::size_of::<Self>() {
             return Err(io::Error::new(
@@ -106,15 +108,18 @@ impl PointRecord {
         Ok(unsafe { std::ptr::read(data.as_ptr() as *const _) })
     }
 
+    #[warn(dead_code)]
     pub fn return_number(&self) -> u8 {
         self.return_info & 0x0F // Extracts the lower 4 bits
     }
 
+    #[warn(dead_code)]
     pub fn number_of_returns(&self) -> u8 {
         (self.return_info >> 4) & 0x0F // Extracts the upper 4 bits
     }
 }
 
+#[warn(dead_code)]
 pub fn read_point_record3(
     file: &mut File,
     las_file_header: &LasFileHeader,
@@ -136,7 +141,6 @@ pub fn read_point_record(file: &mut File) -> io::Result<Point3D> {
     let mut buffer = [0; std::mem::size_of::<PointRecord>()];
     file.read_exact(&mut buffer)?;
 
-    // Assuming PointRecord6 is defined as described
     let point_record = PointRecord {
         x: i32::from_le_bytes(buffer[0..4].try_into().unwrap()),
         y: i32::from_le_bytes(buffer[4..8].try_into().unwrap()),

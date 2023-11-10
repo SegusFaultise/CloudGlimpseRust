@@ -1,7 +1,10 @@
 use std::iter;
 use las_file_handler::las_file_parser::{read_las_file_header, read_las_file, read_point_record, print_las_header_info};
 mod las_file_handler;
+use cgmath::{InnerSpace, Rad, Vector3, Zero, Point3, Matrix4, perspective, num_traits::clamp};
+use wgpu::{StoreOp, TextureFormat};
 use std::path::Path;
+use std::time::{Duration, Instant};
 use std::error::Error;
 use wgpu::util::DeviceExt;
 use winit::{
@@ -10,9 +13,29 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
+struct FrameTimeManager {
+    last_frame_time: Instant,
+}
+
+impl FrameTimeManager {
+    // Create a new FrameTimeManager
+    fn new() -> Self {
+        Self {
+            last_frame_time: Instant::now(),
+        }
+    }
+
+    // Call this once per frame to get the time elapsed since the last frame
+    fn get_frame_time(&mut self) -> f32 {
+        let now = Instant::now();
+        let delta_time = now.duration_since(self.last_frame_time);
+        self.last_frame_time = now;
+        delta_time.as_secs_f32()
+    }
+}
+
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
-
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -70,19 +93,19 @@ static mut VERTICES: &[Vertex] = &[
         position: [1.0, 0.0, 0.0],
         color: [1.0, 1.0,1.0],
     }, // C
-   
 
-];
+
+    ];
 
 
 
 #[rustfmt::skip]
-pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 0.5, 0.5,
-    0.0, 0.0, 0.0, 1.0,
-);
+    pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.5,
+        0.0, 0.0, 0.0, 1.0,
+        );
 
 struct Camera {
     eye: cgmath::Point3<f32>,
@@ -92,6 +115,9 @@ struct Camera {
     fovy: f32,
     znear: f32,
     zfar: f32,
+    yaw: cgmath::Rad<f32>,
+    pitch: cgmath::Rad<f32>,
+    direction: cgmath::Vector3<f32>,
 }
 
 impl Camera {
@@ -123,25 +149,37 @@ impl CameraUniform {
 
 struct CameraController {
     speed: f32,
+    mouse_sensitivity: f32,
+    scroll_sensitivity: f32,
     is_up_pressed: bool,
     is_down_pressed: bool,
     is_forward_pressed: bool,
     is_backward_pressed: bool,
     is_left_pressed: bool,
     is_right_pressed: bool,
+    last_mouse_pos: Option<(f64, f64)>,
+}
+
+pub fn calculate_camera_direction(yaw: Rad<f32>, pitch: Rad<f32>) -> Vector3<f32> {
+    let x = pitch.0.cos() * yaw.0.sin();
+    let y = pitch.0.sin();
+    let z = pitch.0.cos() * yaw.0.cos();
+    Vector3::new(x, y, z).normalize()
 }
 
 impl CameraController {
-    fn new(speed: f32) -> Self {
+    fn new(speed: f32, mouse_sensitivity: f32, scroll_sensitivity: f32) -> Self {
         Self {
             speed,
+            mouse_sensitivity,
+            scroll_sensitivity,
             is_up_pressed: false,
             is_down_pressed: false,
             is_forward_pressed: false,
             is_backward_pressed: false,
             is_left_pressed: false,
             is_right_pressed: false,
-        }
+            last_mouse_pos: None,        }
     }
 
     fn process_events(&mut self, event: &WindowEvent) -> bool {
@@ -153,43 +191,37 @@ impl CameraController {
                         virtual_keycode: Some(keycode),
                         ..
                     },
-                ..
+                    ..
             } => {
                 let is_pressed = *state == ElementState::Pressed;
+
+                println!("Key {:?} is {:?}", keycode, is_pressed); // Debug print
+
                 match keycode {
-                    VirtualKeyCode::Space => {
-                        self.is_up_pressed = is_pressed;
-                        true
-                    }
-                    VirtualKeyCode::LShift => {
-                        self.is_down_pressed = is_pressed;
-                        true
-                    }
-                    VirtualKeyCode::W | VirtualKeyCode::Up => {
+                    VirtualKeyCode::W => {
                         self.is_forward_pressed = is_pressed;
                         true
                     }
-                    VirtualKeyCode::A | VirtualKeyCode::Left => {
+                    VirtualKeyCode::A => {
                         self.is_left_pressed = is_pressed;
                         true
                     }
-                    VirtualKeyCode::S | VirtualKeyCode::Down => {
+                    VirtualKeyCode::S => {
                         self.is_backward_pressed = is_pressed;
                         true
                     }
-                    VirtualKeyCode::D | VirtualKeyCode::Right => {
+                    VirtualKeyCode::D => {
                         self.is_right_pressed = is_pressed;
                         true
                     }
                     _ => false,
-                }
+                }            
             }
             _ => false,
         }
     }
 
-    fn update_camera(&self, camera: &mut Camera) {
-        use cgmath::InnerSpace;
+    fn update_camera2(&self, camera: &mut Camera) {
         let forward = camera.target - camera.eye;
         let forward_norm = forward.normalize();
         let forward_mag = forward.magnitude();
@@ -219,7 +251,106 @@ impl CameraController {
             camera.eye = camera.target - (forward - right * self.speed).normalize() * forward_mag;
         }
     }
-}
+
+    fn update_camera3(&self, camera: &mut Camera) {
+        let forward = camera.direction.normalize();
+        let right = forward.cross(camera.up).normalize();
+        let up = camera.up.normalize();  // Ensure the up vector is normalized as well.
+
+        if self.is_forward_pressed {
+            camera.eye += forward * self.speed;
+        }
+        if self.is_backward_pressed {
+            camera.eye -= forward * self.speed;
+        }
+        if self.is_right_pressed {
+            camera.eye += right * self.speed;
+        }
+        if self.is_left_pressed {
+            camera.eye -= right * self.speed;
+        }
+        if self.is_up_pressed {
+            camera.eye += up * self.speed;  // Allowing upward movement
+        }
+        if self.is_down_pressed {
+            camera.eye -= up * self.speed;  // Allowing downward movement
+        }
+
+        // Debug print to check the camera eye position
+        println!("Camera eye: {:?}", camera.eye);
+    }
+
+    fn update_camera(&mut self, camera: &mut Camera, delta_time: f32) {
+        // Calculate the camera's forward, right, and up vectors
+        let forward = camera.direction.normalize();
+        let right = forward.cross(camera.up).normalize();
+        let up = camera.up.normalize();
+
+        println!("Camera position: {:?}", camera.eye); // Add this line to log the camera position
+        println!("Camera direction: {:?}", camera.direction);
+
+        // Move the camera based on the current input
+        if self.is_forward_pressed {
+            camera.eye += forward * (self.speed * delta_time);
+        }
+        if self.is_backward_pressed {
+            camera.eye -= forward * self.speed * delta_time;
+        }
+        if self.is_right_pressed {
+            camera.eye += right * self.speed * delta_time;
+        }
+        if self.is_left_pressed {
+            camera.eye -= right * self.speed * delta_time;
+        }
+        if self.is_up_pressed {
+            camera.eye += up * self.speed * delta_time;
+        }
+        if self.is_down_pressed {
+            camera.eye -= up * self.speed * delta_time;
+        }
+
+        // Update the camera's direction based on yaw and pitch
+        camera.direction = calculate_camera_direction(camera.yaw, camera.pitch);
+
+        // Update the camera's target
+        camera.target = camera.eye + camera.direction;
+
+        // Print the camera's new position for debugging
+        println!("Camera eye: {:?}", camera.eye);
+    }
+
+    // Helper function to calculate camera direction based on yaw and pitch
+    fn rotate_camera(&mut self, camera: &mut Camera, delta_x: f64, delta_y: f64) {
+        self.mouse_sensitivity = 0.01;
+        let yaw = cgmath::Rad(delta_x as f32 * self.mouse_sensitivity);
+        let pitch = cgmath::Rad(delta_y as f32 * self.mouse_sensitivity);
+
+        camera.yaw += yaw;
+        camera.pitch += pitch;
+
+        // Clamp the pitch to avoid flipping
+        camera.pitch = clamp(camera.pitch, cgmath::Rad(-1.57), cgmath::Rad(1.57));
+
+        // Calculate the new direction vector
+        let direction = cgmath::Vector3::new(
+            camera.pitch.0.cos() * camera.yaw.0.sin(),
+            camera.pitch.0.sin(),
+            camera.pitch.0.cos() * camera.yaw.0.cos(),
+            ).normalize();
+
+        camera.direction = direction;
+        camera.target = camera.eye + direction;
+    }
+
+    fn zoom_camera(&mut self, camera: &mut Camera, delta: &MouseScrollDelta) {
+        match delta {
+            MouseScrollDelta::LineDelta(_, y) => {
+                camera.fovy -= y * self.scroll_sensitivity;
+                camera.fovy = camera.fovy.clamp(20.0, 120.0);
+            }
+            _ => {}
+        }
+    }}
 
 struct State {
     surface: wgpu::Surface,
@@ -236,6 +367,9 @@ struct State {
     camera_uniform: CameraUniform,
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
+    depth_texture: wgpu::Texture,
+    depth_texture_view: wgpu::TextureView,
+    frame_time_manager: FrameTimeManager,
     window: Window,
 }
 
@@ -262,7 +396,7 @@ impl State {
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
             })
-            .await
+        .await
             .unwrap();
         let (device, queue) = adapter
             .request_device(
@@ -278,7 +412,7 @@ impl State {
                     },
                 },
                 None, // Trace path
-            )
+                )
             .await
             .unwrap();
 
@@ -306,15 +440,19 @@ impl State {
 
 
         let camera = Camera {
-            eye: (0.0, 1.0, 2.0).into(),
+            eye: (0.0, 0.0, 1.0).into(),
             target: (0.0, 0.0, 0.0).into(),
             up: cgmath::Vector3::unit_y(),
             aspect: config.width as f32 / config.height as f32,
             fovy: 45.0,
             znear: 0.1,
             zfar: 100.0,
+            yaw: cgmath::Rad(0.0),       // Yaw initially set to 0
+            pitch: cgmath::Rad(0.0),     // Pitch initially set to 0
+            direction: cgmath::Vector3::new(0.0, 0.0, -1.0),
         };
-        let camera_controller = CameraController::new(0.2);
+
+        let camera_controller = CameraController::new(1.0, 1.0, 1.0);
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
@@ -324,6 +462,7 @@ impl State {
             contents: bytemuck::cast_slice(&[camera_uniform]),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
+        queue.write_buffer(&camera_buffer, 0, bytemuck::cast_slice(&[camera_uniform]));
 
         let camera_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -361,6 +500,31 @@ impl State {
                 push_constant_ranges: &[],
             });
 
+        let depth_stencil_state = wgpu::DepthStencilState {
+            format: wgpu::TextureFormat::Depth32Float, // Choose appropriate format
+            depth_write_enabled: true,
+            depth_compare: wgpu::CompareFunction::Less, // Use Less for standard depth testing
+            stencil: wgpu::StencilState::default(),
+            bias: wgpu::DepthBiasState::default(),
+        };
+
+        let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Depth Texture"),
+            size: wgpu::Extent3d {
+                width: config.width,
+                height: config.height,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            view_formats: &[],
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Depth32Float, // common depth format
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+        });
+
+        let depth_texture_view = depth_texture.create_view(&wgpu::TextureViewDescriptor::default());
+
         let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render Pipeline"),
             layout: Some(&render_pipeline_layout),
@@ -394,7 +558,13 @@ impl State {
                 // Requires Features::CONSERVATIVE_RASTERIZATION
                 conservative: false,
             },
-            depth_stencil: None,
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: wgpu::TextureFormat::Depth32Float,
+                depth_write_enabled: true,
+                depth_compare: wgpu::CompareFunction::Less,
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
             multisample: wgpu::MultisampleState {
                 count: 1,
                 mask: !0,
@@ -425,6 +595,10 @@ impl State {
             camera_bind_group,
             camera_uniform,
             window,
+            depth_texture,
+            depth_texture_view,
+            frame_time_manager: FrameTimeManager::new(),
+
         }
     }
 
@@ -432,7 +606,7 @@ impl State {
         &self.window
     }
 
-    fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+    fn resize2(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
             self.size = new_size;
             self.config.width = new_size.width;
@@ -443,18 +617,48 @@ impl State {
         }
     }
 
+    fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        if new_size.width > 0 && new_size.height > 0 {
+            self.config.width = new_size.width;
+            self.config.height = new_size.height;
+            self.surface.configure(&self.device, &self.config);
+
+            // Update camera aspect ratio
+            self.camera.aspect = self.config.width as f32 / self.config.height as f32;
+
+            // Recreate depth texture with the new size
+            self.depth_texture = self.device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("Depth Texture"),
+                size: wgpu::Extent3d {
+                    width: new_size.width,
+                    height: new_size.height,
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                view_formats: &[],
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::Depth32Float,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+            });
+            self.depth_texture_view = self.depth_texture.create_view(&wgpu::TextureViewDescriptor::default());
+        }
+    }
+
     fn input(&mut self, event: &WindowEvent) -> bool {
         self.camera_controller.process_events(event)
     }
 
     fn update(&mut self) {
-        self.camera_controller.update_camera(&mut self.camera);
+        let delta_time = self.frame_time_manager.get_frame_time();
+
+        self.camera_controller.update_camera(&mut self.camera, delta_time);
         self.camera_uniform.update_view_proj(&self.camera);
         self.queue.write_buffer(
             &self.camera_buffer,
             0,
             bytemuck::cast_slice(&[self.camera_uniform]),
-        );
+            );
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -468,7 +672,6 @@ impl State {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Render Encoder"),
             });
-
         {
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
@@ -485,8 +688,14 @@ impl State {
                         store: wgpu::StoreOp::Store,
                     },
                 })],
-                depth_stencil_attachment: None,
-                occlusion_query_set: None,
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &self.depth_texture_view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: StoreOp::Store,
+                    }),
+                stencil_ops: None,
+                }),                occlusion_query_set: None,
                 timestamp_writes: None,
             });
 
@@ -494,10 +703,10 @@ impl State {
             render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.draw(0..unsafe { VERTICES.len() } as u32, 0..1);
-            
+
         }
 
-        self.queue.submit(iter::once(encoder.finish()));
+        self.queue.submit(Some(encoder.finish()));
         output.present();
 
         Ok(())
@@ -514,7 +723,7 @@ pub async fn run() -> Result<(), Box<dyn Error>> {
             env_logger::init();
         }
     }
-    
+
 
     let file_path = Path::new("points.las");
     let point_records = read_las_file(file_path)?;
@@ -530,7 +739,7 @@ pub async fn run() -> Result<(), Box<dyn Error>> {
     unsafe {
         VERTICES = std::mem::transmute(&vertices[..]);
     }
-    
+
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
@@ -550,7 +759,7 @@ pub async fn run() -> Result<(), Box<dyn Error>> {
                 dst.append_child(&canvas).ok()?;
                 Some(())
             })
-            .expect("Couldn't append canvas to document body.");
+        .expect("Couldn't append canvas to document body.");
     }
 
     // State::new uses async code, so we're going to wait for it to finish
@@ -565,21 +774,31 @@ pub async fn run() -> Result<(), Box<dyn Error>> {
                 if !state.input(event) {
                     match event {
                         WindowEvent::CloseRequested
-                        | WindowEvent::KeyboardInput {
-                            input:
-                                KeyboardInput {
-                                    state: ElementState::Pressed,
-                                    virtual_keycode: Some(VirtualKeyCode::Escape),
+                            | WindowEvent::KeyboardInput {
+                                input:
+                                    KeyboardInput {
+                                        state: ElementState::Pressed,
+                                        virtual_keycode: Some(VirtualKeyCode::Escape),
+                                        ..
+                                    },
                                     ..
-                                },
-                            ..
-                        } => *control_flow = ControlFlow::Exit,
+                            } => *control_flow = ControlFlow::Exit,
                         WindowEvent::Resized(physical_size) => {
                             state.resize(*physical_size);
                         }
                         WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                            // new_inner_size is &mut so w have to dereference it twice
                             state.resize(**new_inner_size);
+                        }
+                        WindowEvent::CursorMoved { position, .. } => {
+                            if let Some(last_pos) = state.camera_controller.last_mouse_pos {
+                                let delta_x = position.x - last_pos.0;
+                                let delta_y = position.y - last_pos.1;
+                                state.camera_controller.rotate_camera(&mut state.camera, delta_x, delta_y);
+                            }
+                            state.camera_controller.last_mouse_pos = Some((position.x, position.y));
+                        }
+                        WindowEvent::MouseWheel { delta, .. } => {
+                            state.camera_controller.zoom_camera(&mut state.camera, delta);
                         }
                         _ => {}
                     }
@@ -589,22 +808,19 @@ pub async fn run() -> Result<(), Box<dyn Error>> {
                 state.update();
                 match state.render() {
                     Ok(_) => {}
-                    // Reconfigure the surface if it's lost or outdated
+                    // Handle surface errors
                     Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
                         state.resize(state.size)
                     }
-                    // The system is out of memory, we should probably quit
                     Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
-                    // We're ignoring timeouts
                     Err(wgpu::SurfaceError::Timeout) => log::warn!("Surface timeout"),
                 }
             }
             Event::MainEventsCleared => {
-                // RedrawRequested will only trigger once, unless we manually
-                // request it.
+                state.update(); 
                 state.window().request_redraw();
             }
             _ => {}
         }
     });
-}
+} 
