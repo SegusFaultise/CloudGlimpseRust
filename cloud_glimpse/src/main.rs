@@ -3,7 +3,6 @@
 fn main() {
     pollster::block_on(run());
 }*/
-use std::f32::consts::TAU;
 use bevy::prelude::*;
 use bevy::{
     prelude::*,
@@ -70,6 +69,8 @@ fn setup(
     // Spawn in the points
     let points_mesh_handle: Handle<Mesh> = meshes.add(create_point_mesh_from_Point3D(&point_records));
     commands.spawn(MaterialMeshBundle {
+        // offset the points so that the average point is at the origin
+        transform: Transform::from_xyz((-1.0 * average_x) as f32, (-1.0 * average_y) as f32, (-1.0 * average_z) as f32),
         mesh: points_mesh_handle,
         material: materials.add(PointMaterial {
              color: Color::rgb(1.0, 0.0, 0.0) 
@@ -78,16 +79,11 @@ fn setup(
     });
     // spawn in the orbit camera
     commands.spawn((
-        Camera3dBundle::default(),
-        PanOrbitCamera {
-            // Set focal point (what the camera should look at)
-            focus: Vec3::new(average_x as f32, average_y as f32, average_z as f32),
-            // Set the starting position, relative to focus (overrides camera's transform).
-            alpha: Some(TAU / 8.0),
-            beta: Some(TAU / 8.0),
-            radius: Some(5.0),
-            ..Default::default()
+        Camera3dBundle {
+            transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
+            ..default()
         },
+        PanOrbitCamera::default(),
     ));
     
 }
