@@ -183,12 +183,12 @@ pub fn read_las_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
     let mut point_records: Vec<Point3D> = Vec::new();
 
     while let Ok(point_record) = read_point_record(&mut file) {
-        println!(
+        /*println!(
             "Point: X = {:.2}, Y = {:.2}, Z = {:.2}",
             point_record.x,
             point_record.y,
             point_record.z
-            );
+            );*/
         point_records.push(point_record);
     }
 

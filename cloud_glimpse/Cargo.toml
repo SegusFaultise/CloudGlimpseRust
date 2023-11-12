@@ -5,37 +5,48 @@ edition = "2021"
 resolver = "2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-crate-type = ["cdylib", "rlib"]
+#[lib]
+#crate-type = ["cdylib", "rlib"]
 [dependencies]
-cfg-if = "1"
-anyhow = "1.0"
-bytemuck = { version = "1.12", features = [ "derive" ] }
-cgmath = "0.18"
-env_logger = "0.10"
-log = "0.4"
-pollster = "0.3"
-wgpu = "0.18"
-winit = "0.28"
-lazy_static = "1.4"
+bevy = "0.12.0"
+bevy_panorbit_camera = "0.9.0"
+itertools = "0.11.0"
+#cfg-if = "1"
+#anyhow = "1.0"
+#bytemuck = { version = "1.12", features = [ "derive" ] }
+#cgmath = "0.18"
+#env_logger = "0.10"
+#log = "0.4"
+#pollster = "0.3"
+#wgpu = "0.18"
+#winit = "0.28"
+#lazy_static = "1.4"
 
-[dependencies.image]
-version = "0.24"
-default-features = false
-features = ["png", "jpeg"]
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 1
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-console_error_panic_hook = "0.1.6"
-console_log = "1.0"
-wgpu = { version = "0.18", features = ["webgl"]}
-wasm-bindgen = "=0.2.87"
-wasm-bindgen-futures = "0.4.30"
-web-sys = { version = "0.3.53", features = [
-    "Document",
-    "Window",
-    "Element",
-]}
-[build-dependencies]
-anyhow = "1.0"
-fs_extra = "1.2"
-glob = "0.3"
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
+
+#[dependencies.image]
+#version = "0.24"
+#default-features = false
+#features = ["png", "jpeg"]
+
+#[target.'cfg(target_arch = "wasm32")'.dependencies]
+#console_error_panic_hook = "0.1.6"
+#console_log = "1.0"
+#wgpu = { version = "0.18", features = ["webgl"]}
+#wasm-bindgen = "=0.2.87"
+#wasm-bindgen-futures = "0.4.30"
+#web-sys = { version = "0.3.53", features = [
+#    "Document",
+#    "Window",
+#    "Element",
+#]}
+#[build-dependencies]
+#anyhow = "1.0"
+#fs_extra = "1.2"
+#glob = "0.3"
