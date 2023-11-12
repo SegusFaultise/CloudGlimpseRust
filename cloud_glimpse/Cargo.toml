@@ -11,6 +11,7 @@ resolver = "2"
 bevy = "0.12.0"
 bevy_panorbit_camera = "0.9.0"
 itertools = "0.11.0"
+byteorder = "1.4"
 #cfg-if = "1"
 #anyhow = "1.0"
 #bytemuck = { version = "1.12", features = [ "derive" ] }
