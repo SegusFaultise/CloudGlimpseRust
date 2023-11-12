@@ -3,6 +3,7 @@
 fn main() {
     pollster::block_on(run());
 }*/
+use std::f32::consts::TAU;
 use bevy::prelude::*;
 use bevy::{
     prelude::*,
@@ -54,6 +55,17 @@ fn setup(
         Ok(it) => it,
         Err(err) => return println!("Failed to load las file!"),
     };
+    // find the average point
+    let mut average_x = 0.0;
+    let mut average_y = 0.0;
+    let mut average_z = 0.0;
+    let count = point_records.len() as f64;
+    for point in &point_records {
+        average_x += point.x/count;
+        average_y += point.y/count;
+        average_z += point.z/count;
+    }
+
     println!("loaded");
     // Spawn in the points
     let points_mesh_handle: Handle<Mesh> = meshes.add(create_point_mesh_from_Point3D(&point_records));
@@ -66,11 +78,16 @@ fn setup(
     });
     // spawn in the orbit camera
     commands.spawn((
-        Camera3dBundle {
-            transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
-            ..default()
+        Camera3dBundle::default(),
+        PanOrbitCamera {
+            // Set focal point (what the camera should look at)
+            focus: Vec3::new(average_x as f32, average_y as f32, average_z as f32),
+            // Set the starting position, relative to focus (overrides camera's transform).
+            alpha: Some(TAU / 8.0),
+            beta: Some(TAU / 8.0),
+            radius: Some(5.0),
+            ..Default::default()
         },
-        PanOrbitCamera::default(),
     ));
     
 }

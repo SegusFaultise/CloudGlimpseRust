@@ -15,6 +15,16 @@ impl Point3D {
     fn new(x: f64, y: f64, z: f64) -> Point3D {
         Point3D { x, y, z }
     }
+    //fn new(x: i32, y: i32, z: i32) -> Point3D {
+        //let x = (x as f64)/8.0;
+        //let y = (y as f64)/8.0;
+        //let z = (z as f64)/8.0;
+        //println!("X i32 = {}, Y i32 = {}, Z i32 = {}", x, y, z);
+        //println!("X f32 = {}, Y f32 = {}, Z f32 = {}", x as f32, y as f32, z as f32);
+        //println!("X f64 = {}, Y f64 = {}, Z f64 = {}", x as f64, y as f64, z as f64);
+        //Point3D { x: x as f32, y: y as f32, z: z as f32 }
+        
+    //}
 }
 
 #[repr(C)]
@@ -64,15 +74,13 @@ pub struct PointRecord {
     pub y: i32,
     pub z: i32,
     pub intensity: u16,
-    pub return_info: u8,
+    pub return_number: u8,
+    pub number_of_returns: u8,
     pub classification_flags: u8,
-    pub scanner_channel: u8,
-    pub scan_direction_flag: bool,
-    pub edge_of_flight_line: bool,
     pub classification: u8,
     pub user_data: u8,
     pub scan_angle: i16,
-    pub point_source_id: u16,
+    pub point_source_id: u8,
     pub gps_time: f64,
 }
 
@@ -107,7 +115,7 @@ impl PointRecord {
         }
         Ok(unsafe { std::ptr::read(data.as_ptr() as *const _) })
     }
-
+    /* 
     #[warn(dead_code)]
     pub fn return_number(&self) -> u8 {
         self.return_info & 0x0F // Extracts the lower 4 bits
@@ -116,9 +124,9 @@ impl PointRecord {
     #[warn(dead_code)]
     pub fn number_of_returns(&self) -> u8 {
         (self.return_info >> 4) & 0x0F // Extracts the upper 4 bits
-    }
+    }*/
 }
-
+/* 
 #[warn(dead_code)]
 pub fn read_point_record3(
     file: &mut File,
@@ -135,9 +143,9 @@ pub fn read_point_record3(
             f64::from(point_record.y) / las_file_header.y_scale_factor + las_file_header.y_offset,
             f64::from(point_record.z) / las_file_header.z_scale_factor + las_file_header.z_offset,
             ))
-}
+}*/
 
-pub fn read_point_record(file: &mut File) -> io::Result<Point3D> {
+pub fn read_point_record(file: &mut File, las_file_header: &LasFileHeader) -> io::Result<Point3D> {
     let mut buffer = [0; std::mem::size_of::<PointRecord>()];
     file.read_exact(&mut buffer)?;
 
@@ -146,22 +154,20 @@ pub fn read_point_record(file: &mut File) -> io::Result<Point3D> {
         y: i32::from_le_bytes(buffer[4..8].try_into().unwrap()),
         z: i32::from_le_bytes(buffer[8..12].try_into().unwrap()),
         intensity: u16::from_le_bytes(buffer[12..14].try_into().unwrap()),
-        return_info: buffer[14] & 0x0F, // Extract lower 4 bits
-        classification_flags: buffer[14] >> 4 & 0x0F, // Extract upper 4 bits
-        scanner_channel: buffer[15] & 0x03, // Extract bits 0-1
-        scan_direction_flag: (buffer[15] & 0x40) != 0, // Extract bit 6
-        edge_of_flight_line: (buffer[15] & 0x80) != 0, // Extract bit 7
+        return_number: buffer[14] & 0x0F, // Extract lower 4 bits
+        number_of_returns: buffer[14] >> 4 & 0x0F, // Extract upper 4 bits
+        classification_flags: buffer[15],
         classification: buffer[16],
         user_data: buffer[17],
         scan_angle: i16::from_le_bytes(buffer[18..20].try_into().unwrap()),
-        point_source_id: u16::from_le_bytes(buffer[20..22].try_into().unwrap()),
-        gps_time: f64::from_le_bytes(buffer[22..30].try_into().unwrap()),
+        point_source_id: buffer[20],
+        gps_time: f64::from_le_bytes(buffer[21..29].try_into().unwrap()),
     };
 
     Ok(Point3D::new(
-        f64::from(point_record.x),
-        f64::from(point_record.y),
-        f64::from(point_record.z),
+            f64::from(point_record.x)/100.00,
+            f64::from(point_record.y)/100.0,
+            f64::from(point_record.z)/1000.0,
     ))
 }
 
@@ -182,12 +188,15 @@ pub fn read_las_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
 
     let mut point_records: Vec<Point3D> = Vec::new();
 
-    while let Ok(point_record) = read_point_record(&mut file) {
+    while let Ok(point_record) = read_point_record(&mut file, &las_file_header) {
         /*println!(
-            "Point: X = {:.2}, Y = {:.2}, Z = {:.2}",
+            "Point: X64 = {:.2}, Y64 = {:.2}, Z64 = {:.2}, X32 = {:.2}, Y32 = {:.2}, Z32 = {:.2}",
             point_record.x,
             point_record.y,
-            point_record.z
+            point_record.z,
+            point_record.x as f32,
+            point_record.y as f32,
+            point_record.z as f32,
             );*/
         point_records.push(point_record);
     }
