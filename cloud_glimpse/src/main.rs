@@ -18,15 +18,11 @@ pub struct MinMaxHeightUniform {
     pub max_height: f32,
 }
 
-//unsafe impl Send for MinMaxHeightUniform {}
-//unsafe impl Sync for MinMaxHeightUniform {}
-
 impl Material for PointMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/PointMaterial.wgsl".into()
     }
 }
-
 
 fn main() {
     App::new()
@@ -35,6 +31,14 @@ fn main() {
         .add_plugins(PanOrbitCameraPlugin)
         .add_systems(Startup, setup)
         .run();
+}
+
+fn print_point_color_and_height_info(average_z: f64, min_height: f32, 
+                                     max_height: f32, color: Color) {
+    println!("Height: {}", average_z);
+    println!("Min Height: {}", min_height);
+    println!("Max Height: {}", max_height);
+    println!("Calculated Color: {:?}", color);
 }
 
 fn setup(
@@ -47,13 +51,13 @@ fn setup(
         Err(err) => return println!("Failed to load las file! | Error: {}", err),
     };
 
-    let mut average_x = 0.0;
-    let mut average_y = 0.0;
-    let mut average_z = 0.0;
+    let mut _average_x: f64 = 0.0;
+    let mut _average_y: f64 = 0.0;
+    let mut average_z: f64 = 0.0;
     let count = point_records.len() as f64;
     for point in &point_records {
-        average_x += point.x/count;
-        average_y += point.y/count;
+        _average_x += point.x/count;
+        _average_y += point.y/count;
         average_z += point.z/count;
     }
     
@@ -68,11 +72,8 @@ fn setup(
     println!("loaded");
     let color = height_to_color(average_z as f32, min_height as f32, max_height as f32);
 
-    println!("Height: {}", average_z);
-    println!("Min Height: {}", min_height);
-    println!("Max Height: {}", max_height);
-    println!("Calculated Color: {:?}", color);
-
+    print_point_color_and_height_info(average_z, min_height, max_height, color);
+    
     commands.insert_resource(MinMaxHeightUniform {
         min_height,
         max_height,
@@ -84,8 +85,6 @@ fn setup(
                                                   max_height));
     commands.spawn(PbrBundle {
         mesh: points_mesh_handle,
-        // Rest of the bundle configuration
-        // ...
         ..Default::default()
     });
 
@@ -99,13 +98,12 @@ fn setup(
 
 }
 
-/// this is the OG func
 fn height_to_color(height: f32, min_height: f32, max_height: f32) -> Color {
     let normalized_height = (height - min_height) / (max_height - min_height);
 
-    let r = normalized_height;        // Red component increases with height
-    let g = 0.5;                      // No green component
-    let b = 1.0 - normalized_height;  // Blue component decreases with height
+    let r = normalized_height;
+    let g = 0.5;
+    let b = 1.0 - normalized_height;
 
     Color::rgb(r, g, b)
 }
@@ -122,7 +120,7 @@ fn create_point_mesh_from_point3d(points: &Vec<Point3D>, min_height: f32, max_he
     let offset_y = min_y + range_y / 2.0;
     let offset_z = min_z + range_z / 2.0;
 
-    let scale_factor = 1.5 / range_x.max(range_y).max(range_z); // Normalize based on the largest range
+    let scale_factor = 1.5 / range_x.max(range_y).max(range_z);
 
     let positions: Vec<[f32; 3]> = points
         .iter()
@@ -137,7 +135,7 @@ fn create_point_mesh_from_point3d(points: &Vec<Point3D>, min_height: f32, max_he
         .iter()
         .map(|point| {
             let color = height_to_color(point.z as f32, min_height, max_height);
-            [color.r(), color.g(), color.b(), 1.0] // RGBA format
+            [color.r(), color.g(), color.b(), 1.0]
         })
         .collect();
 
@@ -147,4 +145,3 @@ fn create_point_mesh_from_point3d(points: &Vec<Point3D>, min_height: f32, max_he
 
     return mesh;
 }
-
