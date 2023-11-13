@@ -1,2 +1,6 @@
 # CloudGlimpse2
-Rust time baby
+
+# Building wasm
+`wasm-pack build --release --target web`
+# Running
+python3 serve.py
