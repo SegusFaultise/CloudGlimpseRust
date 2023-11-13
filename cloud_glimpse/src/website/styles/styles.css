@@ -1,0 +1,31 @@
+body {
+    background-color: rgb(0, 0, 0); /* Light blue background */
+}
+
+h1 {
+    color: #fffffff5; /* Dark teal for headings */
+}
+
+#file-input {
+    border-color: #80cbc4; /* Teal border for the file input */
+}
+
+#load-button {
+    background-color: transparent; /* Darker teal for buttons */
+    border: solid;
+    border-color: #940B92;
+    border-radius: 10px;
+    color: white;
+}
+
+#load-button:hover {
+    border-color: #DA0C81;
+}
+
+canvas {
+    display: block; /* Ensures the canvas is a block-level element */
+    margin: 0 auto; /* Centers the canvas within its column */
+    width: 100%; /* Sets the width to fill the column */
+    border: 2px solid #ffffff; /* Optional: border styling */
+    border-radius: 20px;
+}
