@@ -83,7 +83,7 @@ pub struct PointRecord {
     pub user_data: u8,
     pub scan_angle: i16,
     pub point_source_id: u8,
-    pub gps_time: f64,
+    pub gps_time: f64, 
 }
 
 /// Reads a LAS file and returns a vector of `Point3D` representing the point data.
@@ -94,16 +94,23 @@ pub struct PointRecord {
 /// # Returns
 /// Result containing either a Vector of `Point3D` or an error.
 pub fn read_las_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
-    let file = File::open(file_path)?;
+    let file = File::open(file_path)
+        .map_err(|e| format!("Failed to open file {}: {}", file_path.display(), e))?;
 
     let mut reader = BufReader::new(file);
-    let las_file_header = read_las_file_header(&mut reader)?;
+    let las_file_header = read_las_file_header(&mut reader)
+        .map_err(|e| format!("Failed to read LAS file header: {}", e))?;
 
-    reader.seek(SeekFrom::Start(las_file_header.offset_to_point_data as u64))?;
+    reader.seek(SeekFrom::Start(las_file_header.offset_to_point_data as u64))
+        .map_err(|e| format!("Failed to seek to point data: {}", e))?;
+
     let mut point_records = Vec::new();
 
-    while let Ok(point_record) = read_point_record(&mut reader) {
-        point_records.push(convert_to_point3d(&point_record, &las_file_header));
+    loop {
+        match read_point_record(&mut reader) {
+            Ok(point_record) => point_records.push(convert_to_point3d(&point_record, &las_file_header)),
+            Err(_) => break,
+        }
     }
     print_las_header_info(&las_file_header);
     Ok(point_records)
@@ -279,6 +286,7 @@ pub fn read_point_record<R: Read>(reader: &mut R) -> io::Result<PointRecord> {
 /// # Returns
 /// `Point3D` representing the scaled and offset point.
 fn convert_to_point3d(record: &PointRecord, header: &LasFileHeader) -> Point3D {
+    //println!("X: {} | Y: {} | Z: {} ", record.x, record.y, record.z);
     Point3D {
         x: record.x as f64 * header.x_scale_factor + header.x_offset,
         y: record.y as f64 * header.y_scale_factor + header.y_offset,
@@ -290,11 +298,11 @@ fn convert_to_point3d(record: &PointRecord, header: &LasFileHeader) -> Point3D {
 /// 
 /// # Arguments
 /// * `header` - A reference to the `LasFileHeader`.
-#[warn(dead_code)]
+//#[warn(dead_code)]
 pub fn print_las_header_info(header: &LasFileHeader) {
-    println!("Z Offset: {:2} Y Offset: {:2} X Offset: {:2}", header.z_offset, header.y_offset, header.x_offset);
-    println!("Version: {}.{}", header.version_major, header.version_minor);
-    println!("Header Size: {}", header.header_size);
-    println!("Point Data Record Format: {}", header.point_data_record_format);
-    println!("Number of Point Records: {}", header.legacy_number_of_point_records);
+    //println!("Z Offset: {:2} Y Offset: {:2} X Offset: {:2}", header.z_offset, header.y_offset, header.x_offset);
+    //println!("Version: {}.{}", header.version_major, header.version_minor);
+    //println!("Header Size: {}", header.header_size);
+    //println!("Point Data Record Format: {}", header.point_data_record_format);
+    //println!("Number of Point Records: {}", header.legacy_number_of_point_records);
 }
