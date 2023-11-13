@@ -1,5 +1,6 @@
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::error::Error;
+use std::io::Cursor;
 use std::fs::File;
 use std::io::{self, BufReader, Read, Seek, SeekFrom};
 use std::path::Path;#[derive(Debug)]
@@ -93,7 +94,7 @@ pub struct PointRecord {
 /// 
 /// # Returns
 /// Result containing either a Vector of `Point3D` or an error.
-pub fn read_las_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
+pub fn read_las_file2(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
     let file = File::open(file_path)
         .map_err(|e| format!("Failed to open file {}: {}", file_path.display(), e))?;
 
@@ -115,6 +116,35 @@ pub fn read_las_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
     print_las_header_info(&las_file_header);
     Ok(point_records)
 }
+
+/// Reads a LAS file data in binary form and returns a vector of `Point3D` representing the point data.
+/// 
+/// # Arguments
+/// * `file_data` - A reference to binary data of a LAS file.
+/// 
+/// # Returns
+/// Result containing either a Vector of `Point3D` or an error.
+pub fn read_las_file(file_data: &[u8]) -> Result<Vec<Point3D>, Box<dyn Error>> {
+    let mut reader = Cursor::new(file_data);
+
+    let las_file_header = read_las_file_header(&mut reader)
+        .map_err(|e| format!("Failed to read LAS file header: {}", e))?;
+
+    reader.seek(SeekFrom::Start(las_file_header.offset_to_point_data as u64))
+        .map_err(|e| format!("Failed to seek to point data: {}", e))?;
+
+    let mut point_records = Vec::new();
+
+    loop {
+        match read_point_record(&mut reader) {
+            Ok(point_record) => point_records.push(convert_to_point3d(&point_record, &las_file_header)),
+            Err(_) => break,
+        }
+    }
+    print_las_header_info(&las_file_header);
+    Ok(point_records)
+}
+
 
 /// Reads the header of a LAS file.
 /// 
