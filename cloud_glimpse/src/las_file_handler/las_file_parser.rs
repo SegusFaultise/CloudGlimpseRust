@@ -1,5 +1,6 @@
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::error::Error;
+use wasm_bindgen::prelude::*;
 use std::io::Cursor;
 use std::fs::File;
 use std::io::{self, BufReader, Read, Seek, SeekFrom};
@@ -94,7 +95,7 @@ pub struct PointRecord {
 /// 
 /// # Returns
 /// Result containing either a Vector of `Point3D` or an error.
-pub fn read_las_file2(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
+pub fn read_las_file_from_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
     let file = File::open(file_path)
         .map_err(|e| format!("Failed to open file {}: {}", file_path.display(), e))?;
 
@@ -142,6 +143,7 @@ pub fn read_las_file(file_data: &[u8]) -> Result<Vec<Point3D>, Box<dyn Error>> {
         }
     }
     print_las_header_info(&las_file_header);
+
     Ok(point_records)
 }
 
@@ -329,10 +331,20 @@ fn convert_to_point3d(record: &PointRecord, header: &LasFileHeader) -> Point3D {
 /// # Arguments
 /// * `header` - A reference to the `LasFileHeader`.
 //#[warn(dead_code)]
-pub fn print_las_header_info(header: &LasFileHeader) {
+fn print_las_header_info(header: &LasFileHeader) {
     //println!("Z Offset: {:2} Y Offset: {:2} X Offset: {:2}", header.z_offset, header.y_offset, header.x_offset);
     //println!("Version: {}.{}", header.version_major, header.version_minor);
     //println!("Header Size: {}", header.header_size);
     //println!("Point Data Record Format: {}", header.point_data_record_format);
     //println!("Number of Point Records: {}", header.legacy_number_of_point_records);
+}
+
+#[wasm_bindgen]
+pub fn get_total_points(file_data: &[u8]) -> Result<u32, JsValue> {
+    let mut reader = Cursor::new(file_data);
+
+    match read_las_file_header(&mut reader) {
+        Ok(header) => Ok(header.legacy_number_of_point_records),
+        Err(e) => Err(JsValue::from_str(&format!("Error: {}", e))),
+    }
 }

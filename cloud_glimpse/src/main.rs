@@ -1,12 +1,9 @@
 use bevy::prelude::*;
-use bevy::prelude::{Resource, Window};
-use wasm_bindgen::prelude::*;
-use bevy::window::WindowPlugin;
 use bevy::render::render_resource::{AsBindGroup, PrimitiveTopology, ShaderRef};
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use bevy_panorbit_camera::PanOrbitCamera;
 use std::path::Path;
-use las_file_handler::las_file_parser::{read_las_file, Point3D, get_total_points};
+use las_file_handler::las_file_parser::{read_las_file_from_file, Point3D};
 mod las_file_handler;
 use std::sync::Mutex;
 
@@ -30,31 +27,9 @@ impl Material for PointMaterial {
     }
 }
 
-#[derive(Resource)]
-struct LasFileData {
-    points: Vec<Point3D>,
-}
-
-impl LasFileData {
-    pub fn new(points: Vec<Point3D>) -> Self {
-        Self { points }
-    }
-}
-
-#[wasm_bindgen]
-pub fn main(file_data: &[u8]) { 
-    let point_records = match read_las_file(file_data) {
-        Ok(points) => points,
-        Err(err) => {
-            eprintln!("Failed to load las file data! | Error: {}", err);
-            return;
-        },
-    };
-    println!("TOTAL: {}", point_records.len());
-
+fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .insert_resource(LasFileData::new(point_records))
         .add_plugins(DefaultPlugins)
         .add_plugins(PanOrbitCameraPlugin)
         .add_systems(Startup, setup)
@@ -100,26 +75,30 @@ pub fn update_global_count(value: f64) {
     count.add(value);
 }
 
-#[wasm_bindgen]
-pub fn total_points() -> f64 {
+pub fn total_points() {
     let total = get_global_total_points();
     println!("{}", total);
-    return total;
 }
 
 fn setup(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    las_file_data: Res<LasFileData>){
-   
+    mut meshes: ResMut<Assets<Mesh>>,){
+
+    let file_path = Path::new("/home/neuralnuts/Desktop/points.las");
+    let point_records = match read_las_file_from_file(file_path) {
+        Ok(it) => it,
+        Err(err) => return println!("Failed to load las file! | Error: {}", err),
+    };
+
     let mut _average_x: f64 = 0.0;
     let mut _average_y: f64 = 0.0;
     let mut average_z: f64 = 0.0;
-    let count = las_file_data.points.len() as f64;
+    let count = point_records.len() as f64;
     
     update_global_count(count);
+    total_points();
 
-    for point in &las_file_data.points {
+    for point in &point_records {
         _average_x += point.x/count;
         _average_y += point.y/count;
         average_z += point.z/count;
@@ -127,7 +106,7 @@ fn setup(
     
     let mut min_height = f32::MAX;
     let mut max_height = f32::MIN;
-    for point in &las_file_data.points {
+    for point in &point_records {
         let z = point.z as f32;
         min_height = min_height.min(z);
         max_height = max_height.max(z);
@@ -144,7 +123,7 @@ fn setup(
     });
 
     let points_mesh_handle: Handle<Mesh> = 
-        meshes.add(create_point_mesh_from_point3d(&las_file_data.points, 
+        meshes.add(create_point_mesh_from_point3d(&point_records, 
                                                   min_height, 
                                                   max_height));
     commands.spawn(PbrBundle {
