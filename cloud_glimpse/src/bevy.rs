@@ -1,4 +1,3 @@
-use bevy::ecs::query;
 use bevy::prelude::*;
 use bevy::{
     prelude::*,
@@ -20,13 +19,7 @@ mod las_file_handler;
 #[derive(AsBindGroup, Debug, Clone, Asset, TypePath)]
 pub struct PointMaterial {
     #[uniform(0)]
-    max_color: Color,
-    #[uniform(1)]
-    min_color: Color,
-    #[uniform(2)]
-    max_height: f32,
-    #[uniform(3)]
-    min_height: f32,
+    color: Color,
 }
 
 impl Material for PointMaterial {
@@ -35,8 +28,9 @@ impl Material for PointMaterial {
     }
     fn vertex_shader() -> ShaderRef {
         "shaders/PointMaterial.wgsl".into()
+    
     }
-
+    
 }
 
 
@@ -50,7 +44,6 @@ fn main() {
     .run();
 }
 
-
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -61,46 +54,16 @@ fn setup(
         Ok(it) => it,
         Err(err) => return println!("Failed to load las file!"),
     };
-    // find the average point
-    let mut average_x = 0.0;
-    let mut average_y = 0.0;
-    let mut average_z = 0.0;
-    // find the max and min height
-    let mut max_height = f32::MIN;
-    let mut min_height = f32::MAX;
-    let count = point_records.len() as f64;
-    for point in &point_records {
-        if (point.z as f32) > max_height {
-            max_height = point.z as f32;
-        }
-        if (point.z as f32) < min_height {
-            min_height = point.z as f32;
-        }
-        average_x += point.x/count;
-        average_y += point.y/count;
-        average_z += point.z/count;
-    }
-    println!("Max Height: {}", max_height);
-    println!("Min Height: {}", min_height);
-    println!("Average X: {}", average_x);
-    println!("Average Y: {}", average_y);
-    println!("Average Z: {}", average_z);
+    println!("loaded");
     // Spawn in the points
     let points_mesh_handle: Handle<Mesh> = meshes.add(create_point_mesh_from_Point3D(&point_records));
     commands.spawn(MaterialMeshBundle {
-        
-        // offset the points so that the average point is at the origin
-        transform: Transform::from_xyz((-1.0 * average_x) as f32, (-1.0 * average_y) as f32, (-1.0 * average_z) as f32),
         mesh: points_mesh_handle,
         material: materials.add(PointMaterial {
-            max_color: Color::rgb(1.0, 0.0, 0.0),// color for the highest point 
-            min_color: Color::rgb(0.0, 0.0, 1.0),// color for the lowest point
-            max_height: max_height, // highest point
-            min_height: min_height, // lowest point
+             color: Color::rgb(1.0, 0.0, 0.0) 
             }),
             ..Default::default()
     });
-
     // spawn in the orbit camera
     commands.spawn((
         Camera3dBundle {
