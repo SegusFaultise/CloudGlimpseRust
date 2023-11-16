@@ -114,7 +114,7 @@ pub fn read_las_file_from_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn
             Err(_) => break,
         }
     }
-    print_las_header_info(&las_file_header);
+    //print_las_header_info(&las_file_header);
     Ok(point_records)
 }
 
@@ -142,7 +142,7 @@ pub fn read_las_file(file_data: &[u8]) -> Result<Vec<Point3D>, Box<dyn Error>> {
             Err(_) => break,
         }
     }
-    print_las_header_info(&las_file_header);
+    //print_las_header_info(&las_file_header);
 
     Ok(point_records)
 }
@@ -332,11 +332,11 @@ fn convert_to_point3d(record: &PointRecord, header: &LasFileHeader) -> Point3D {
 /// * `header` - A reference to the `LasFileHeader`.
 //#[warn(dead_code)]
 fn print_las_header_info(header: &LasFileHeader) {
-    //println!("Z Offset: {:2} Y Offset: {:2} X Offset: {:2}", header.z_offset, header.y_offset, header.x_offset);
-    //println!("Version: {}.{}", header.version_major, header.version_minor);
-    //println!("Header Size: {}", header.header_size);
-    //println!("Point Data Record Format: {}", header.point_data_record_format);
-    //println!("Number of Point Records: {}", header.legacy_number_of_point_records);
+    println!("Z Offset: {:2} Y Offset: {:2} X Offset: {:2}", header.z_offset, header.y_offset, header.x_offset);
+    println!("Version: {}.{}", header.version_major, header.version_minor);
+    println!("Header Size: {}", header.header_size);
+    println!("Point Data Record Format: {}", header.point_data_record_format);
+    println!("Number of Point Records: {}", header.legacy_number_of_point_records);
 }
 
 #[wasm_bindgen]
