@@ -76,6 +76,14 @@ p {
 
 img {
     cursor: pointer;
+    border: solid;
+    border-radius: 10px;
+    border-color: transparent;
+}
+
+img:hover {
+    transition: 0.5s;
+    background-color: #c42442;
 }
 
 a {
