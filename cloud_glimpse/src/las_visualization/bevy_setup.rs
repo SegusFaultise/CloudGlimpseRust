@@ -1,8 +1,5 @@
 use bevy::prelude::*;
-use bevy::prelude::{Resource, Window};
-use bevy::window::WindowPlugin;
-use bevy::render::render_resource::{AsBindGroup, PrimitiveTopology, ShaderRef};
-use bevy_panorbit_camera::PanOrbitCameraPlugin;
+use bevy::prelude::Resource;
 use bevy_panorbit_camera::PanOrbitCamera;
 
 use crate::las_file_handler::las_file_parser::Point3D;

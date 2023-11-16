@@ -1,16 +1,13 @@
 use bevy::prelude::*;
-use bevy::prelude::{Resource, Window};
-use bevy::window::WindowPlugin;
-use bevy::render::render_resource::{AsBindGroup, PrimitiveTopology, ShaderRef};
+use bevy::render::render_resource::{AsBindGroup, ShaderRef};
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
 
 use wasm_bindgen::prelude::*;
 
 mod las_file_handler;
-use las_file_handler::las_file_parser::{read_las_file, Point3D, get_total_points};
+use las_file_handler::las_file_parser::read_las_file;
 
 mod las_visualization;
-use las_visualization::point_creation::{create_point_mesh_from_point3d, height_to_color};
 use las_visualization::bevy_setup::{setup, LasFileData};
 
 /// A material for rendering points, containing color information.

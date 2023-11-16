@@ -84,7 +84,7 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,){
 
-    let file_path = Path::new("/home/neuralnuts/Desktop/points.las");
+    let file_path = Path::new("/home/neuralnuts/Desktop/bigp.las");
     let point_records = match read_las_file_from_file(file_path) {
         Ok(it) => it,
         Err(err) => return println!("Failed to load las file! | Error: {}", err),

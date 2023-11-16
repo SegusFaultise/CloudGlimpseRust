@@ -1,20 +1,10 @@
 import init from '/cloud_glimpse/pkg/cloud_glimpse.js';
 import { main } from '/cloud_glimpse/pkg/cloud_glimpse.js'; // Adjust the path as needed
-import { total_points } from "/cloud_glimpse/pkg/cloud_glimpse.js";
 
 async function runMainWithFile(file) {
     const arrayBuffer = await file.arrayBuffer();
 
     main(new Uint8Array(arrayBuffer));
-}
-
-async function loadTotalPoints() {
-    try {
-        const pointsCount = await total_points();
-        console.log("Total points:", pointsCount);
-    } catch (error) {
-        console.error("Error:", error);
-    }
 }
 
 init().then(() => {
