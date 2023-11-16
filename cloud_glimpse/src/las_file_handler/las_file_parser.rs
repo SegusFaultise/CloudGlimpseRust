@@ -94,6 +94,7 @@ pub struct PointRecord {
 /// # Returns
 /// Result containing either a Vector of `Point3D` or an error.
 pub fn read_las_file(file_path: &Path) -> Result<Vec<Point3D>, Box<dyn Error>> {
+    println!("Reading file: {:?}", file_path.to_str());
     let file = File::open(file_path)?;
 
     let mut reader = BufReader::new(file);
