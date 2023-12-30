@@ -1,4 +1,5 @@
-# CloudGlimpse2
+# CloudGlimpse "Rust"
+Web/desktop based .las file visualizer
 
 # Building wasm
 ```console
