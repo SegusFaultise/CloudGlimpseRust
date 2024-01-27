@@ -1,6 +1,6 @@
 # CloudGlimpse2
 
-# How to run
+# How to run Web Branch
 Install docker
 ```console
 # Add Docker's official GPG key:
