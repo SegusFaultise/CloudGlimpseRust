@@ -49,6 +49,12 @@ canvas {
     border: none;
 }
 
+.card-about {
+    dislpay: block;
+    justify-content: center;
+    align-items: center;
+}
+
 .icon-upload {
     font-size: 2.5rem;
     color: #fff;

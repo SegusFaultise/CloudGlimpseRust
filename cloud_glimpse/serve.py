@@ -1,5 +1,6 @@
 import http.server
 import socketserver
+import atexit
 
 class bcolors:
     HEADER = '\033[95m'
@@ -24,4 +25,7 @@ Handler.extensions_map = {
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
     print(f"{bcolors.OKGREEN}[SUCCESS]:{bcolors.ENDC} serving at, {bcolors.UNDERLINE + bcolors.OKCYAN}http://localhost:{PORT}/src/website/index.html{bcolors.ENDC}")
 
-    httpd.serve_forever()
+    try:
+        httpd.serve_forever()
+    finally:
+        socketserver.shutdown()
