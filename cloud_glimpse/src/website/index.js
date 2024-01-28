@@ -1,5 +1,5 @@
-import init from '/CloudGlimpseRust/cloud_glimpse/pkg/cloud_glimpse.js';
-import { main } from '/CloudGlimpseRust/cloud_glimpse/pkg/cloud_glimpse.js'; // Adjust the path as needed
+import init from '/cloud_glimpse/pkg/cloud_glimpse.js';
+import { main } from '/cloud_glimpse/pkg/cloud_glimpse.js'; // Adjust the path as needed
 
 async function runMainWithFile(file) {
     const arrayBuffer = await file.arrayBuffer();
