@@ -28,6 +28,10 @@ h1 {
     margin-top: 2vh;
 }
 
+p {
+    margin-bottom: 10px;
+}
+
 #file-input {
     border-color: #80cbc4; /* Teal border for the file input */
 }
