@@ -1,0 +1,10 @@
+/home/neuralnuts/Projects/CloudGlimpseRust/cloud_glimpse/target/wasm32-unknown-unknown/release/deps/libowned_ttf_parser-9f3f5afe392b7cce.rmeta: /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/lib.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/convert.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/owned.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/preparse.rs
+
+/home/neuralnuts/Projects/CloudGlimpseRust/cloud_glimpse/target/wasm32-unknown-unknown/release/deps/libowned_ttf_parser-9f3f5afe392b7cce.rlib: /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/lib.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/convert.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/owned.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/preparse.rs
+
+/home/neuralnuts/Projects/CloudGlimpseRust/cloud_glimpse/target/wasm32-unknown-unknown/release/deps/owned_ttf_parser-9f3f5afe392b7cce.d: /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/lib.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/convert.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/owned.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/preparse.rs
+
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/lib.rs:
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/convert.rs:
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/owned.rs:
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/owned_ttf_parser-0.20.0/src/preparse.rs:

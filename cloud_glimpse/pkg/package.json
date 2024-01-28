@@ -1,0 +1,14 @@
+{
+  "name": "cloud_glimpse",
+  "version": "0.1.0",
+  "files": [
+    "cloud_glimpse_bg.wasm",
+    "cloud_glimpse.js",
+    "cloud_glimpse.d.ts"
+  ],
+  "module": "cloud_glimpse.js",
+  "types": "cloud_glimpse.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

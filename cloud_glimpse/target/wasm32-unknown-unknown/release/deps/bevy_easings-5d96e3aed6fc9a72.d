@@ -1,0 +1,10 @@
+/home/neuralnuts/Projects/CloudGlimpseRust/cloud_glimpse/target/wasm32-unknown-unknown/release/deps/libbevy_easings-5d96e3aed6fc9a72.rmeta: /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/lib.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/plugin.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/implemented.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/../README.md
+
+/home/neuralnuts/Projects/CloudGlimpseRust/cloud_glimpse/target/wasm32-unknown-unknown/release/deps/libbevy_easings-5d96e3aed6fc9a72.rlib: /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/lib.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/plugin.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/implemented.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/../README.md
+
+/home/neuralnuts/Projects/CloudGlimpseRust/cloud_glimpse/target/wasm32-unknown-unknown/release/deps/bevy_easings-5d96e3aed6fc9a72.d: /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/lib.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/plugin.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/implemented.rs /home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/../README.md
+
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/lib.rs:
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/plugin.rs:
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/implemented.rs:
+/home/neuralnuts/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_easings-0.12.2/src/../README.md:
