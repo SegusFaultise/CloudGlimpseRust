@@ -1,4 +1,4 @@
-import init from '../pkg/cloud_glimpse.js'; // d
+import init from '../../pkg/cloud_glimpse.js'; // d
 import { main } from '../pkg/cloud_glimpse.js'; // Adjust the path as needed
 
 async function runMainWithFile(file) {
