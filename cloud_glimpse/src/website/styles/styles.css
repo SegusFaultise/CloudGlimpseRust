@@ -47,6 +47,15 @@ canvas {
     margin-top: -10px;
 }
 
+.spinner {
+    display: none; /* Initially hidden */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000; /* Ensure it's above other content */
+}
+
 .card {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: transparent;
@@ -65,14 +74,19 @@ canvas {
 }
 
 .btn-primary {
+    border: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    font-family: Arial;
     color: #fff;
-    background-color: #6c5ce7;
-    border-color: #6c5ce7;
+    border-color: white;
+    background-color: black;
 }
 
 .btn-primary:hover {
-    background-color: #5b4bc9;
-    border-color: #5b4bc9;
+    transition: 0.5s;
+    background-color: #9c145c;
+    border-color: #9c145c;
 }
 
 p {
@@ -94,7 +108,7 @@ img {
 
 img:hover {
     transition: 0.5s;
-    background-color: #c42442;
+    background-color: #9c145c;
 }
 
 a {
