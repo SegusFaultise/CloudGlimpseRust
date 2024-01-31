@@ -1,6 +1,33 @@
 import init from '../../pkg/cloud_glimpse.js'; // d
 import { main } from '../../pkg/cloud_glimpse.js'; // Adjust the path as needed
 
+document.addEventListener('DOMContentLoaded', function() {
+    function resizeBevyCanvas() {
+        var bevyCanvas = document.querySelector('canvas');
+
+        if (!bevyCanvas) {
+            console.error('Canvas element not found.');
+            return;
+        }
+        
+        var originalWidth = parseInt(bevyCanvas.getAttribute('width'));
+        var originalHeight = parseInt(bevyCanvas.getAttribute('height'));
+        var aspectRatio = originalWidth / originalHeight;
+
+        var containerWidth = bevyCanvas.parentElement.clientWidth;
+
+        bevyCanvas.style.width = containerWidth + 'px'; // Set width to the container width
+        bevyCanvas.style.height = (containerWidth / aspectRatio) + 'px'; // Calculate height based on aspect ratioum height if needed
+    }
+
+    resizeBevyCanvas();
+
+    window.addEventListener('resize', function() {
+        resizeBevyCanvas();
+    });
+
+});
+
 async function runMainWithFile(file) {
     document.getElementById('spinner').style.display = 'block';
 
@@ -32,13 +59,12 @@ init().then(() => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            
+
             const blob = await response.blob();
             const fixedFile = new File([blob], 'points');
 
             runMainWithFile(fixedFile);
             moveCanvasToDiv();
-            loadTotalPoints();
         } 
         catch (error) {
             console.error('Error loading file:', error);
@@ -58,7 +84,6 @@ init().then(() => {
 
         runMainWithFile(file);
         moveCanvasToDiv();
-        loadTotalPoints();
     });
 }).catch(e => {
     console.error("Failed to initialize the WASM module:", e);

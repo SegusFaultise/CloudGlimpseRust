@@ -13,7 +13,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-PORT = 8000
+PORT = 8888
 
 Handler = http.server.SimpleHTTPRequestHandler
 Handler.extensions_map = {
@@ -28,4 +28,4 @@ with socketserver.TCPServer(("", PORT), Handler) as httpd:
     try:
         httpd.serve_forever()
     finally:
-        socketserver.shutdown()
+        httpd.shutdown()
