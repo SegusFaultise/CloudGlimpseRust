@@ -1,5 +1,5 @@
-import init from '../../pkg/cloud_glimpse.js'; // d
-import { main } from '../../pkg/cloud_glimpse.js'; // Adjust the path as needed
+import init from '../../pkg/cloud_glimpse.js'; // Path for gh pages
+import { main } from '../../pkg/cloud_glimpse.js'; // Path for gh pages
 
 document.addEventListener('DOMContentLoaded', function() {
     function resizeBevyCanvas() {
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Canvas element not found.');
             return;
         }
-        
+
         var originalWidth = parseInt(bevyCanvas.getAttribute('width'));
         var originalHeight = parseInt(bevyCanvas.getAttribute('height'));
         var aspectRatio = originalWidth / originalHeight;
@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function() {
         resizeBevyCanvas();
     });
-
 });
 
 async function runMainWithFile(file) {
@@ -36,9 +35,9 @@ async function runMainWithFile(file) {
 
         main(new Uint8Array(arrayBuffer));
     } 
-    //catch (error) {
-        //    console.error("Error loading file:", error);
-        //} 
+    catch (error) {
+        console.error("Error loading file:", error);
+    } 
     finally {
         document.getElementById('spinner').style.display = 'none';
     }
@@ -55,16 +54,25 @@ init().then(() => {
     test_button.addEventListener('click', async () => {
         try {
             const response = await fetch(fixedFilePath);
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
             const blob = await response.blob();
             const fixedFile = new File([blob], 'points');
 
-            runMainWithFile(fixedFile);
-            moveCanvasToDiv();
+            const bevyCanvas = document.querySelector("canvas");
+
+            if(!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            if(bevyCanvas != null) {
+                if(confirm("CloudGlimpse is already running? do you wish to restart?")) {
+
+                    location.reload();
+                    return false;
+                }
+            }
+            else {
+                runMainWithFile(fixedFile);
+                moveCanvasToDiv();
+            }
         } 
         catch (error) {
             console.error('Error loading file:', error);
@@ -78,7 +86,15 @@ init().then(() => {
     const fileInput = document.getElementById('file-input');
 
     fileInput.addEventListener('change', async () => {
-        if (!fileInput.files.length) return;
+        const bevyCanvas = document.querySelector("canvas");
+
+        if(!fileInput.files.length) return;
+        if(bevyCanvas != null) {
+            alert("CloudGlimpse is already running!");
+            
+            location.reload();
+            return false;
+        }
 
         const file = fileInput.files[0];
 
