@@ -1,6 +1,21 @@
 # CloudGlimpse2
 
-# How to run Web Branch
+# How to run web branch manually
+```console
+sudo apt update && sudo apt upgrade && sudo apt install pkg-config && sudo apt install librust-alsa-sys-dev && sudo apt install libudev-dev && sudo apt install python3
+```
+
+Build wasm for the web
+```console
+wasm-pack build --release --target web
+```
+
+Run serve script
+```console
+Python3 serve.py
+```
+
+# How to run Web Branch With Docker
 Install docker
 ```console
 # Add Docker's official GPG key:
