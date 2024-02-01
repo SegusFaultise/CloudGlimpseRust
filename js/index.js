@@ -1,5 +1,5 @@
-import init from '../../pkg/cloud_glimpse.js'; // Path for gh pages
-import { main } from '../../pkg/cloud_glimpse.js'; // Path for gh pages
+import init from '/cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
+import { main } from '/cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
 
 document.addEventListener('DOMContentLoaded', function() {
     function resizeBevyCanvas() {
