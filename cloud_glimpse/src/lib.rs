@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::{AsBindGroup, ShaderRef};
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
-
+use bevy_wasm_window_resize::WindowResizePlugin;
 use wasm_bindgen::prelude::*;
 
 mod las_file_handler;
@@ -59,6 +59,7 @@ pub fn main(file_data: &[u8]) {
         .insert_resource(LasFileData::new(point_records))
         .add_plugins(DefaultPlugins)
         .add_plugins(PanOrbitCameraPlugin)
+        .add_plugins(WindowResizePlugin)
         .add_systems(Startup, setup)
         .run();
 }

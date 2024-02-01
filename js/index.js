@@ -1,31 +1,6 @@
 import init from '/cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
 import { main } from '/cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
 
-document.addEventListener('DOMContentLoaded', function() {
-    function resizeBevyCanvas() {
-        var bevyCanvas = document.querySelector('canvas');
-
-        if (!bevyCanvas) {
-            console.error('Canvas element not found.');
-            return;
-        }
-
-        var originalWidth = parseInt(bevyCanvas.getAttribute('width'));
-        var originalHeight = parseInt(bevyCanvas.getAttribute('height'));
-        var aspectRatio = originalWidth / originalHeight;
-
-        var containerWidth = bevyCanvas.parentElement.clientWidth;
-
-        bevyCanvas.style.width = containerWidth + 'px'; // Set width to the container width
-        bevyCanvas.style.height = (containerWidth / aspectRatio) + 'px'; // Calculate height based on aspect ratioum height if needed
-    }
-
-    resizeBevyCanvas();
-
-    window.addEventListener('resize', function() {
-        resizeBevyCanvas();
-    });
-});
 
 async function runMainWithFile(file) {
     document.getElementById('spinner').style.display = 'block';
@@ -58,7 +33,7 @@ init().then(() => {
             const fixedFile = new File([blob], 'points');
 
             const bevyCanvas = document.querySelector("canvas");
-
+            
             if(!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -111,7 +86,14 @@ function moveCanvasToDiv() {
     const observer = new MutationObserver((mutations, obs) => {
 
         const canvas = document.querySelector("canvas");
+        canvas.id = "bevy";
 
+        // prevent right click menu for panning functionality
+        canvas.oncontextmenu = function (e) {
+            e.preventDefault();
+        };
+        const element = document.getElementById("section0");
+        element.remove();
         if (canvas) {
             div.appendChild(canvas);
             console.log("Canvas moved to div.");
