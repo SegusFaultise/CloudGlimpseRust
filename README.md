@@ -12,7 +12,7 @@ wasm-pack build --release --target web
 
 Run serve script
 ```console
-Python3 serve.py
+python3 serve.py
 ```
 
 # How to run Web Branch With Docker
