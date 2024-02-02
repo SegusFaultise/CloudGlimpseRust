@@ -1,5 +1,5 @@
-import init from '/CloudGlimpseRust/cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
-import { main } from '/CloudGlimpseRust/cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
+import init from '../cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
+import { main } from '../cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
 
 
 async function runMainWithFile(file) {
@@ -20,6 +20,11 @@ async function runMainWithFile(file) {
 
 init().then(() => {
     console.log("WASM module loaded and initialized");
+    document.getElementById('spinner').style.display = 'none';
+    // the test button is disabled, enable it
+    document.getElementById('test-button').disabled = false;
+    // the upload button is disabled, enable it
+    document.getElementById('file-input').disabled = false;
 
     const loadButton = document.getElementById('load-button');
     const test_button = document.getElementById('test-button');

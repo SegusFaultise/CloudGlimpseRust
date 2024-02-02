@@ -48,11 +48,11 @@ pub fn main(file_data: &[u8]) {
     let point_records = match read_las_file(file_data) {
         Ok(points) => points,
         Err(err) => {
-            eprintln!("Failed to load las file data! | Error: {}", err);
+            warn!("Failed to load las file data! | Error: {}", err);
             return;
         },
     };
-    println!("TOTAL: {}", point_records.len());
+    info!("TOTAL: {}", point_records.len());
 
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))

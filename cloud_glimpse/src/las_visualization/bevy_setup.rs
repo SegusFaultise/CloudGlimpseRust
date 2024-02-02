@@ -3,7 +3,7 @@ use bevy::prelude::Resource;
 use bevy_panorbit_camera::PanOrbitCamera;
 
 use crate::las_file_handler::las_file_parser::Point3D;
-use crate::las_visualization::point_creation::{height_to_color, create_point_mesh_from_point3d};
+use crate::las_visualization::point_creation::create_point_mesh_from_point3d;
 
 /// A struct that holds the minimum and maximum height values.
 #[derive(Debug, Clone, PartialEq, Resource)]
@@ -31,20 +31,19 @@ impl LasFileData {
     }
 }
 
-/// Prints the color and height information of a point.
+/// Prints the height information of a point.
 ///
 /// # Arguments
 /// * `average_z` - The average z value (height) of all points.
 /// * `min_height` - The minimum height value.
 /// * `max_height` - The maximum height value.
-/// * `color` - The color data of the point.
-fn print_point_color_and_height_info(average_z: f64, min_height: f32, 
-                                     max_height: f32, color: Color) {
-    println!("Height: {}", average_z);
-    println!("Min Height: {}", min_height);
-    println!("Max Height: {}", max_height);
-    println!("Calculated Color: {:?}", color);
+fn print_point_height_info(average_z: f64, min_height: f32, 
+                                     max_height: f32) {
+    info!("Height: {}", average_z);
+    info!("Min Height: {}", min_height);
+    info!("Max Height: {}", max_height);
 }
+
 
 /// Sets up the rendering of points from a LAS file.
 ///
@@ -76,10 +75,10 @@ pub fn setup(
         max_height = max_height.max(z);
     }
 
-    println!("loaded");
-    let color = height_to_color(average_z as f32, min_height as f32, max_height as f32);
+    info!("loaded2");
 
-    print_point_color_and_height_info(average_z, min_height, max_height, color);
+
+    print_point_height_info(average_z, min_height, max_height);
     
     commands.insert_resource(MinMaxHeightUniform {
         min_height,

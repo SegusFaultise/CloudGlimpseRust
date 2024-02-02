@@ -21,7 +21,7 @@
         </div>
         
         <div class="text-center mt-5 mb-5">
-            <button id="test-button" class="btn-primary" type="button">load test file</button>
+            <button id="test-button" class="btn btn-outline-primary" type="button" disabled>load test file</button>
         </div>
 
         <div class="text-center mt-5 mb-5">
@@ -29,7 +29,7 @@
         </div>
         
         <form id="file-upload-form" class="uploader text-center">
-            <input id="file-input" type="file" name="fileUpload" accept=".las" hidden />
+            <input id="file-input" type="file" name="fileUpload" disabled accept=".las" hidden />
 
             <label for="file-input" class="dropzone">
                 <i id="load-button"></i>
@@ -38,7 +38,7 @@
             </label>
         </form>
         
-        <div class="spinner" id="spinner">
+        <div class="spinner" id="spinner" style="display: block;">
             <i class="fas fa-spinner fa-spin fa-3x"></i> <!-- Font Awesome spinner icon -->
         </div>
     </section>
