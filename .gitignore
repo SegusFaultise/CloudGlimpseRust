@@ -15,4 +15,3 @@ Cargo.lock
 *.pdb
 
 cloud_glimpse/target/
-points.las
