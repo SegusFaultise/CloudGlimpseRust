@@ -13,7 +13,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-PORT = 8881
+PORT = 8882
 
 Handler = http.server.SimpleHTTPRequestHandler
 Handler.extensions_map = {

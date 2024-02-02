@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
-export function get_total_points(a: number, b: number, c: number): void;
 export function main(a: number, b: number): void;
+export function get_total_points(a: number, b: number, c: number): void;
 export function wgpu_compute_pass_set_pipeline(a: number, b: number): void;
 export function wgpu_compute_pass_set_bind_group(a: number, b: number, c: number, d: number, e: number): void;
 export function wgpu_compute_pass_set_push_constant(a: number, b: number, c: number, d: number): void;
@@ -53,11 +53,11 @@ export function wgpu_render_bundle_push_debug_group(a: number, b: number): void;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
 export const __wbindgen_export_2: WebAssembly.Table;
-export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h0eac015221acbf12(a: number, b: number, c: number): void;
-export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h6977027f3eda2f36(a: number, b: number, c: number): void;
-export function wasm_bindgen__convert__closures__invoke0_mut__h3a86369c288263c2(a: number, b: number): void;
-export function wasm_bindgen__convert__closures__invoke0_mut__h900968dd560ff5ec(a: number, b: number): void;
-export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h6daa4014b87ae6fb(a: number, b: number, c: number): void;
+export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h2784acfa122cbb03(a: number, b: number, c: number): void;
+export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h135cff4e279590b4(a: number, b: number, c: number): void;
+export function wasm_bindgen__convert__closures__invoke0_mut__ha9885ffa11d60f98(a: number, b: number): void;
+export function wasm_bindgen__convert__closures__invoke0_mut__ha53c4f066719fcc1(a: number, b: number): void;
+export function wasm_bindgen__convert__closures__invoke1_mut__h06c4431a1a77652c(a: number, b: number, c: number): void;
 export function __wbindgen_add_to_stack_pointer(a: number): number;
 export function __wbindgen_free(a: number, b: number, c: number): void;
 export function __wbindgen_exn_store(a: number): void;

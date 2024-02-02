@@ -1,6 +1,23 @@
 import init from '../cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
 import { main } from '../cloud_glimpse/pkg/cloud_glimpse.js'; // Path for gh pages
 
+function buildReturnButton() {
+    var buttonContainerDiv = document.getElementById("return-div");
+
+    buttonContainerDiv.className = 'button-container';
+
+    buttonContainerDiv.style.position = 'fixed';
+    buttonContainerDiv.style.top = '0';
+    buttonContainerDiv.style.left = '0';
+    buttonContainerDiv.style.width = '100%';
+    buttonContainerDiv.style.display = 'flex';
+    buttonContainerDiv.style.justifyContent = 'space-between';
+    buttonContainerDiv.style.padding = '10px';
+
+    document.body.appendChild(buttonContainerDiv);
+
+    buttonContainerDiv.innerHTML = `<button id="return-button" onclick="window.location.reload();" class="btn btn-outline-primary">Return</button>`;
+}
 
 async function runMainWithFile(file) {
     document.getElementById('spinner').style.display = 'block';
@@ -38,20 +55,21 @@ init().then(() => {
             const fixedFile = new File([blob], 'points');
 
             const bevyCanvas = document.querySelector("canvas");
-            
+
             if(!response.ok) {
                 throw new Error('Network response was not ok');
             }
             if(bevyCanvas != null) {
                 if(confirm("CloudGlimpse is already running? do you wish to restart?")) {
-
                     location.reload();
+
                     return false;
                 }
             }
             else {
                 runMainWithFile(fixedFile);
                 moveCanvasToDiv();
+                buildReturnButton();
             }
         } 
         catch (error) {
@@ -71,7 +89,7 @@ init().then(() => {
         if(!fileInput.files.length) return;
         if(bevyCanvas != null) {
             alert("CloudGlimpse is already running!");
-            
+
             location.reload();
             return false;
         }
@@ -80,6 +98,7 @@ init().then(() => {
 
         runMainWithFile(file);
         moveCanvasToDiv();
+        buildReturnButton();
     });
 }).catch(e => {
     console.error("Failed to initialize the WASM module:", e);
@@ -100,7 +119,7 @@ function moveCanvasToDiv() {
         const element = document.getElementById("section0");
         element.remove();
         if (canvas) {
-            div.appendChild(canvas);
+            div.appendChild(canvas); 
             console.log("Canvas moved to div.");
             obs.disconnect();
         }
