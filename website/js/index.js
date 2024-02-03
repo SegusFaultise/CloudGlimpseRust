@@ -1,5 +1,5 @@
-import init from '../..//pkg/cloud_glimpse.js'; // Path for wasm js
-import { main } from '../..//pkg/cloud_glimpse.js'; // Path for wasm js
+import init from '../../pkg/cloud_glimpse.js'; // Path for wasm js
+import { main } from '../../pkg/cloud_glimpse.js'; // Path for wasm js
 
 function buildReturnButton() {
     var buttonContainerDiv = document.getElementById("return-div");
