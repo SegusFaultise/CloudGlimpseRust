@@ -46,7 +46,7 @@ init().then(() => {
     const loadButton = document.getElementById('load-button');
     const test_button = document.getElementById('test-button');
 
-    const fixedFilePath = '../points/points.las';
+    const fixedFilePath = '../../points/points.las';
 
     test_button.addEventListener('click', async () => {
         try {
