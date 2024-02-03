@@ -1,0 +1,141 @@
+body, html {
+    background-color: black;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+/* Container for sections */
+.scroll-container {
+    height: 100vh;
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll; /* Allow scrolling only in the container */
+}
+
+/* Each section's styling */
+section {
+    padding-top: 5vh;
+    scroll-snap-align: start;
+    height: 100vh;
+    display: block;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+h1 {
+    color: #fffffff5; /* Dark teal for headings */
+    margin-top: 2vh;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+#file-input {
+    border-color: #80cbc4; /* Teal border for the file input */
+}
+
+canvas {
+    display: block; /* Ensures the canvas is a block-level element */
+    margin: 0 auto; /* Centers the canvas horizontally */
+    width: 10px;
+    background-color: #ffffff; /* Give it a background color so you can see it */
+}
+
+#bevy-canvas {
+    margin-top: -10px;
+    z-index: 0;
+}
+
+.btn-outline-primary {
+    color: #cc217b;
+    border-color: #cc217b;
+    border-width: 2px;
+    z-index: 1000;
+}
+
+.btn-outline-primary:hover {
+    background-color: #9c145c;
+    border-color: transparent;
+}
+
+.spinner {
+    display: none; /* Initially hidden */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: transparent;
+    border: none;
+}
+
+.card-about {
+    dislpay: block;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-upload {
+    font-size: 2.5rem;
+    color: #fff;
+}
+
+.btn-primary {
+    padding: 7px;
+    border: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    font-family: Arial;
+    color: #fff;
+    border-color: white;
+    background-color: black;
+}
+
+.btn-primary:hover {
+    transition: 0.5s;
+    background-color: #9c145c;
+    border-color: #9c145c;
+}
+
+h5 {
+    color: #aaa;
+}
+
+p {
+    margin-top: 1vh;
+    color: #fff;
+}
+
+.icon-upload {
+    font-size: 3rem; /* Adjust size as needed */
+    color: #aaa;
+}
+
+img {
+    cursor: pointer;
+    border: solid;
+    border-radius: 10px;
+    border-color: transparent;
+}
+
+img:hover {
+    transition: 0.5s;
+    background-color: #9c145c;
+}
+
+a {
+    color: #aaa;
+    margin: 0.5vh;
+    text-decoration: none;
+}
+
+a:hover {
+    transition: 0.3s;
+    color: #e4e4e4;
+}
