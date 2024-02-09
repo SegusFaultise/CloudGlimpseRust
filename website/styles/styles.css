@@ -48,18 +48,6 @@ canvas {
     z-index: 0;
 }
 
-.btn-outline-primary {
-    color: #cc217b;
-    border-color: #cc217b;
-    border-width: 2px;
-    z-index: 1000;
-}
-
-.btn-outline-primary:hover {
-    background-color: #9c145c;
-    border-color: transparent;
-}
-
 .spinner {
     display: none; /* Initially hidden */
     position: absolute;
